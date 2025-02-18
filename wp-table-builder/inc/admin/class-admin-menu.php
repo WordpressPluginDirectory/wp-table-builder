@@ -53,7 +53,9 @@ class Admin_Menu
 		add_filter('set-screen-option', function ($status, $option, $value) {
 			return ($option == 'tables_per_page') ? (int) $value : $status;
 		}, 10, 3);
+
 		add_action('admin_menu', array($this, 'register_menus'), 9);
+
 		add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
 		add_action('wp_ajax_create_table', array($this, 'create_table'));
 		add_action('wp_ajax_save_table', array($this, 'save_table'));
@@ -257,11 +259,12 @@ class Admin_Menu
 	public function add_wp_admin_bar_new_table_create_page($wp_admin_bar)
 	{
 		if (current_user_can('manage_options')) {
+			$new_link = WPTB_LEGACY_BUILDER ? 'wptb-builder':'wptb-create';
 			$wp_admin_bar->add_menu(array(
 				'parent' => 'new-content',
 				'id' => 'wptb-add-new',
 				'title' => __('Table', 'wp-table-builder'),
-				'href' => esc_url(admin_url('admin.php?page=wptb-builder')),
+				'href' => esc_url(admin_url('admin.php?page='.$new_link)),
 			));
 		}
 	}
@@ -275,8 +278,24 @@ class Admin_Menu
 	public function register_menus()
 	{
 
+		
 		global $builder_page, $tables_overview, $table_list, $builder_tool_page;
 		$menu_cap = Helpers::wptb_get_capability_manage_options();
+		// Add Welcome sub menu item.
+		$builder_page = add_submenu_page(
+			'',
+			esc_html__('Table Builder', 'wp-table-builder'),
+			esc_html__('Welcome Page', 'wp-table-builder'),
+			$menu_cap,
+			'wp-table-builder-welcome',
+			array($this, 'welcome')
+		);
+
+		if (!WPTB_LEGACY_BUILDER) {
+			\WPTableBuilder\WPTableBuilder::add_menu();
+			return;
+		}
+
 
 		// Default Tables top level menu item.
 		$tables_overview = add_menu_page(
@@ -289,15 +308,7 @@ class Admin_Menu
 			apply_filters('wptb_menu_position', '50')
 		);
 
-		// Add Welcome sub menu item.
-		$builder_page = add_submenu_page(
-			'',
-			esc_html__('Table Builder', 'wp-table-builder'),
-			esc_html__('Welcome Page', 'wp-table-builder'),
-			$menu_cap,
-			'wp-table-builder-welcome',
-			array($this, 'welcome')
-		);
+		
 
 		// All Tables sub menu item.
 		$table_list = add_submenu_page(
@@ -373,6 +384,12 @@ class Admin_Menu
 
 	public function enqueue_scripts($hook)
 	{
+		if (!WPTB_LEGACY_BUILDER && (
+			!isset( $_GET['page'] ) ||
+			$_GET['page'] !== 'wp-table-builder-welcome'
+		)) {
+			return;
+		}
 		/*
 		 * This function is provided for demonstration purposes only.
 		 *
@@ -416,6 +433,7 @@ class Admin_Menu
 			$admin_object = [
 				'ajaxurl' => admin_url('admin-ajax.php'),
 				'security_code' => wp_create_nonce('wptb-security-nonce'),
+				'general_nonce' => wp_create_nonce('wp_table_builder_settings'),
 				'strings' => $strings,
 				'store' => [
 					'tableId' => $table_id,
