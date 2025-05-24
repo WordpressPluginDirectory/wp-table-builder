@@ -57,7 +57,6 @@ class Admin_Menu
 		add_action('admin_menu', array($this, 'register_menus'), 9);
 
 		add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
-		add_action('wp_ajax_create_table', array($this, 'create_table'));
 		add_action('wp_ajax_save_table', array($this, 'save_table'));
 		add_action('wp_ajax_get_table', array($this, 'get_table'));
 		add_action('admin_bar_menu', array($this, 'add_wp_admin_bar_new_table_create_page'), 500);
@@ -65,19 +64,6 @@ class Admin_Menu
 		add_filter('wp-table-builder/filter/get_table', [$this, 'strip_tags'], 10, 1);
 		add_filter('wp-table-builder/filter/table_html_shortcode', [$this, 'strip_tags'], 10, 1);
 		add_filter('wp-table-builder/table_content', [$this, 'strip_tags'], 10, 1);
-	}
-
-	public function create_table()
-	{
-		if (current_user_can(Settings_Manager::ALLOWED_ROLE_META_CAP)) {
-			$id = wp_insert_post([
-				'post_title' => '',
-				'post_content' => '',
-				'post_type' => 'wptb-tables',
-				'post_status' => 'draft'
-			]);
-			wp_die(json_encode(['created', $id]));
-		}
 	}
 
 	public function save_table()
@@ -115,8 +101,12 @@ class Admin_Menu
 
 	public function insert_table_to_db($params)
 	{
+		$title = '';
+		if (isset($params->title) && !empty($params->title)) {
+			$title = sanitize_text_field($params->title);
+		}
 		$id = wp_insert_post([
-			'post_title' => sanitize_text_field($params->title),
+			'post_title' => $title,
 			'post_content' => '',
 			'post_type' => 'wptb-tables',
 			'post_status' => 'draft'
@@ -139,9 +129,13 @@ class Admin_Menu
 
 	public function update_table_in_db($params)
 	{
+		$title = '';
+		if (isset($params->title) && !empty($params->title)) {
+			$title = sanitize_text_field($params->title);
+		}
 		wp_update_post([
 			'ID' => absint($params->id),
-			'post_title' => sanitize_text_field($params->title),
+			'post_title' => $title,
 			'post_content' => '',
 			'post_type' => 'wptb-tables',
 			'post_status' => 'draft'
@@ -550,9 +544,12 @@ class Admin_Menu
 			$handler = 'wptb-import-menu';
 			$plugin_version = NS\PLUGIN_VERSION;
 
+			
 			// script and style enqueue
+			wp_register_script('wptb-admin-builder-purify', plugin_dir_url(__FILE__) . 'js/purify.min.js', array(), NS\PLUGIN_VERSION, false);
 			wp_enqueue_script($handler, $script_url, [], $plugin_version, true);
 			wp_register_script('wptb-admin-builder-js', plugin_dir_url(__FILE__) . 'js/admin.js', array('jquery'), $plugin_version, true);
+			wp_enqueue_script('wptb-admin-builder-purify');
 			wp_enqueue_script('wptb-admin-builder-js');
 			wp_enqueue_style('wptb-settings-manager-style', $style_url, [], $plugin_version);
 

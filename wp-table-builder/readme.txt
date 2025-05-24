@@ -2,8 +2,8 @@
 Contributors: dotcamp, wptb, imtiazrayhan, istiakrayhan, permafrost06, erdembircan, protibimbok, ultimateblocks, wpcdplugin, wpleaders1
 Tags: table, table builder, drag and drop
 Requires at least: 4.9
-Tested up to: 6.7
-Stable tag: 2.0.3
+Tested up to: 6.8
+Stable tag: 2.0.7
 Requires PHP: 7.4
 License: GPL3+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -90,9 +90,43 @@ That's it. You're done!
 
 == Changelog ==
 
+= 2.0.7 =
+* FIX: Improved XSS security
+* FIX: Potential path traversal vulnerability
+* FIX: ZIP not importing in UNIX systems
+* FIX: Dynamic roles in allowed roles option
+* FIX: Import CSV without delimiter
+* FIX: Preview not working in some cases
+* FIX: Responsive preview not working properly
+* FIX: Different sizes in builder & frontend on some cases
+* FIX: headers already sent warning
+* IMPROVE: Updated Freemius sdk
+
+= 2.0.6 =
+* FIX: Fixed XSS issue
+* FIX: Fixed undefined array key & stdClass warning
+
+= 2.0.5 =
+* FIX: 'h.json' not found error on table list Actions
+* FIX: broken special chars in table list title
+* FIX: Column becomes hidden if width is 0
+* FIX: Error when different instance of same block is selected right after one another
+* FIX: Improved XSS protection
+* IMPROVE: Remove hover styles from the preview
+
+= 2.0.4 =
+* FIX: Loading tables & patterns despite permalink config
+* FIX: target attribute getting removed in custom html
+* FIX: Frontend assets loading after every update
+* FIX: Column sizing when fixed width is set with colspan
+* FIX: Saving linkrel of image & button
+* FIX: Display button size accurately in the editor
+* FIX: Star rating block displaying more than 2 digits
+
 = 2.0.3 =
 * FIX: Rest route warning
 * FIX: Image link label
+* FIX: Undefined key warning: isEmpty, stickyTopRow
 
 = 2.0.2 =
 * FIX: New builder not visible to non admin users
